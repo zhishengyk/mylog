@@ -1,6 +1,9 @@
 #include <iostream>
 #include <filesystem>
 #include "mmap.h"
+MMap::MMap(const std::filesystem::path& filePath) : filePath_(filePath), handle_(nullptr), capacity_(0) {
+    Init_();
+}
 MMap::resize(size_t new_size)
 {
     Reserve(new_size);
@@ -21,8 +24,16 @@ MMap::push(const uint8_t* data, size_t length){
     resize(current_size + length);
     std::memcpy(data() + current_size, data, length);
 }
-MMap::Reserve(size_t new_size)
-{
+MMap::get_ratio() const{
+    if(Capacity() == 0) {
+        return 0.0;
+    }
+    return static_cast<double>(size()) / static_cast<double>(Capacity());
+}
+MMap::empty() const{
+    return size() == 0;
+}
+MMap::Reserve(size_t new_size){
     if(new_size > capacity_){
         size_t new_capacity = capacity_ == 0 ? 4096 : capacity_;
         while(new_capacity < new_size){
@@ -31,8 +42,7 @@ MMap::Reserve(size_t new_size)
         EnsureCapacity(new_capacity);
     }
 }
-MMap::EnsureCapacity(size_t new_size)
-{
+MMap::EnsureCapacity(size_t new_size){
     if(handle_){
         Sync();
         Unmap();
@@ -42,18 +52,26 @@ MMap::EnsureCapacity(size_t new_size)
     }
     capacity_ = new_size;
 }
-MMap::Trymap(size_t capacity)
-{
+MMap::Capacity() const{
+    return capacity_ - sizeof(MMapHeader);
+}
+MMap::Trymap(size_t capacity){
     // Platform-specific mmap implementation goes here
     return true; // Placeholder
-}
-MMap::Header() const
-{
-    return static_cast<MMapHeader*>(handle_);
 }
 MMap::Unmap(){
 
 }
 MMap::Sync(){
+
+}
+MMap::Isvalid() const{
+    return Header() && Header()->magic == MMapHeader::MAGIC;
+}
+MMap::Header() const
+{
+    return static_cast<MMapHeader*>(handle_);
+}
+MMap::Init_(){
 
 }
