@@ -1,10 +1,10 @@
-#include <iostream>
+#include <cstddef>
+#include <cstdint>
 #include <filesystem>
+#include <iostream>
 class MMap {
 public:
-    MMap(const std::filesystem::path& filePath) : filePath_(filePath) {
-        // Constructor implementation
-    }
+    MMap(const std::filesystem::path& filePath);
     ~MMap() = default; 
 
     MMap(const MMap&) = delete;
@@ -19,7 +19,7 @@ public:
 
     void clear();
 
-    void push(const uint8_t* data, size_t length);
+    void push(const uint8_t* input, size_t length);
 
     double get_ratio() const;
 
@@ -29,7 +29,7 @@ private:
         static constexpr uint32_t MAGIC = 0x4D4D4150; // 'MMAP'
         uint32_t magic = MAGIC;
         uint32_t size = 0;
-    }
+    };
     void Reserve(size_t new_size);
 
     void EnsureCapacity(size_t new_size);
@@ -44,10 +44,10 @@ private:
 
     bool Isvalid() const;
     
-    MMap* Header() const;
+    MMapHeader* Header() const;
 
     void Init_();
     std::filesystem::path filePath_;
     void* handle_;
     size_t capacity_;
-}
+};
