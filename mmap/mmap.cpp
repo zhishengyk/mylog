@@ -58,22 +58,10 @@ void MMap::EnsureCapacity(size_t new_size){
 size_t MMap::Capacity() const{
     return capacity_ - sizeof(MMapHeader);
 }
-bool MMap::Trymap(size_t capacity){
-    
-    return true; 
-void MMap::Unmap(){
-
-}
-void MMap::Sync(){
-
-}
 bool MMap::Isvalid() const{
     return Header() && Header()->magic == MMapHeader::MAGIC;
 }
 MMap::MMapHeader* MMap::Header() const
 {
     return static_cast<MMapHeader*>(handle_);
-}
-void MMap::Init_(){
-
 }
