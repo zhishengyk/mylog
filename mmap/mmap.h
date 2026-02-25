@@ -1,7 +1,9 @@
+#pragma once
 #include <cstddef>
 #include <cstdint>
 #include <filesystem>
 #include <iostream>
+#include <windows.h>
 class MMap {
 public:
     MMap(const std::filesystem::path& filePath);
@@ -50,4 +52,10 @@ private:
     std::filesystem::path filePath_;
     void* handle_;
     size_t capacity_;
+#ifdef _WIN32
+    HANDLE hFile_;
+    HANDLE hMap_;
+#else
+    int fd_;
+#endif
 };
