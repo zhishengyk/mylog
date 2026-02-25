@@ -7,7 +7,7 @@
 class MMap {
 public:
     MMap(const std::filesystem::path& filePath);
-    ~MMap() = default; 
+    ~MMap();
 
     MMap(const MMap&) = delete;
     

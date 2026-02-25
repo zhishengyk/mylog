@@ -7,6 +7,22 @@
 MMap::MMap(const std::filesystem::path& filePath) : filePath_(filePath), handle_(nullptr), capacity_(0) {
     Init_();
 }
+
+MMap::~MMap() {
+    Sync();
+    Unmap();
+#ifdef _WIN32
+    if (hFile_) {
+        CloseHandle(hFile_);
+        hFile_ = nullptr;
+    }
+#else
+    if (fd_ >= 0) {
+        close(fd_);
+        fd_ = -1;
+    }
+#endif
+}
 void MMap::resize(size_t new_size)
 {
     Reserve(new_size);

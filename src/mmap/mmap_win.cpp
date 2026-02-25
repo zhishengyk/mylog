@@ -1,6 +1,7 @@
 #ifdef _WIN32
 #include "mmap.h"
 
+#include <algorithm>
 #include <stdexcept>
 namespace {
     size_t page_size(){
@@ -79,13 +80,62 @@ void MMap::Init_() {
 
 
 }
-bool MMap::Trymap(size_t) {
-    throw std::runtime_error("MMap::Trymap not implemented on Windows yet");
+bool MMap::Trymap(size_t capacity) {
+    size_t need = std::max(capacity, sizeof(MMapHeader));
+    size_t map_size = align_up(need, page_size());
+    if (handle_) {
+        UnmapViewOfFile(handle_);
+        handle_ = nullptr;
+    }
+    if (hMap_) {
+        CloseHandle(hMap_);
+        hMap_ = nullptr;
+    }
+    LARGE_INTEGER end{};
+    end.QuadPart = static_cast<LONGLONG>(map_size);
+    if (!SetFilePointerEx(hFile_, end, nullptr, FILE_BEGIN) || !SetEndOfFile(hFile_)) {
+        return false;
+    }
+    hMap_ = CreateFileMappingW(
+        hFile_, NULL, PAGE_READWRITE,
+        static_cast<DWORD>(map_size >> 32),
+        static_cast<DWORD>(map_size & 0xFFFFFFFF),
+        NULL
+    );
+    if (!hMap_) {
+        return false;
+    }
+
+    handle_ = MapViewOfFile(hMap_, FILE_MAP_ALL_ACCESS, 0, 0, map_size);
+    if (!handle_) {
+        CloseHandle(hMap_);
+        hMap_ = NULL;
+        return false;
+    }
+    capacity_ = map_size;
+    return true;
 }
 
-void MMap::Unmap() {}
+void MMap::Unmap() {
+    if (handle_) {
+        UnmapViewOfFile(handle_);
+        handle_ = nullptr;
+    }
+    if (hMap_) {
+        CloseHandle(hMap_);
+        hMap_ = nullptr;
+    }
+    capacity_ = 0;
+}
 
-void MMap::Sync() {}
+void MMap::Sync() {
+    if (!handle_) return;
+    FlushViewOfFile(handle_, capacity_);
+    if (hFile_) {
+        FlushFileBuffers(hFile_);
+    }
+}
+
 
 
 #endif
