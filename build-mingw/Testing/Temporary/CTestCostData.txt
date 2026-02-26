@@ -1,2 +1,2 @@
-mmap_test 1 1.77343
+mmap_test 2 1.3171
 ---
