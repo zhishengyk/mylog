@@ -1,0 +1,36 @@
+# C/C++ build artifacts
+*.o
+*.obj
+*.a
+*.lib
+*.so
+*.so.*
+*.dll
+*.dylib
+*.exe
+*.out
+
+# Debugging / intermediate files
+*.pdb
+*.ilk
+*.exp
+*.log
+*.tlog
+*.tmp
+
+# Build directories
+build/
+bin/
+obj/
+out/
+cmake-build-*/
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+compile_commands.json
+
+# IDE/editor
+.vs/
+.vscode/
+*.suo
+*.user
